@@ -1,0 +1,35 @@
+{
+  "name": "agentsd",
+  "version": "0.1.0",
+  "description": "Stream Deck plugin for Claude Code sessions",
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -c -w",
+    "dev": "streamdeck dev",
+    "link": "streamdeck link com.paultyng.agentsd.sdPlugin",
+    "unlink": "streamdeck unlink com.paultyng.agentsd",
+    "hooks:install": "node -e \"import('./scripts/hooks.mjs').then(m => m.install())\"",
+    "hooks:uninstall": "node -e \"import('./scripts/hooks.mjs').then(m => m.uninstall())\"",
+    "debug:hooks": "node scripts/debug-hooks.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paultyng/agentsd.git"
+  },
+  "author": "Paul Tyng",
+  "license": "MIT",
+  "dependencies": {
+    "@elgato/streamdeck": "^2.0.4"
+  },
+  "devDependencies": {
+    "@elgato/cli": "^1.7.3",
+    "@rollup/plugin-commonjs": "^29.0.2",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "@types/node": "^25.5.0",
+    "rollup": "^4.60.0",
+    "tslib": "^2.8.1",
+    "typescript": "^6.0.2"
+  }
+}
