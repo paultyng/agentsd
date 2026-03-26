@@ -24,6 +24,7 @@ export function transition(current: State, event: HookEventName): State | null {
       // Stay in PROCESSING — another tool may follow. Stop event moves to IDLE.
       // Also transition from AWAITING_PERMISSION → PROCESSING: this means the
       // permission was approved outside the plugin (e.g. in the terminal).
+      // NOTE: session-manager guards this transition when a plugin-held permission is pending.
       return current === State.PROCESSING || current === State.AWAITING_PERMISSION
         ? State.PROCESSING
         : null;

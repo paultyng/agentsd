@@ -103,7 +103,23 @@ export class SessionManager extends EventEmitter {
 
     // Apply state transition
     const prevState = session.state;
-    const nextState = transition(session.state, event);
+    let nextState = transition(session.state, event);
+
+    // Guard: suppress transitions away from AWAITING_PERMISSION when a plugin-held
+    // permission is pending. Parallel tool events (PreToolUse, PostToolUse, etc.)
+    // must not kick the session out of AWAITING_PERMISSION and auto-deny.
+    if (
+      session.pendingPermission &&
+      prevState === State.AWAITING_PERMISSION &&
+      nextState !== null &&
+      nextState !== State.AWAITING_PERMISSION &&
+      event !== "PermissionRequest" &&
+      event !== "Stop" &&
+      event !== "SessionEnd"
+    ) {
+      nextState = null;
+    }
+
     if (nextState !== null) {
       session.state = nextState;
     }
@@ -252,8 +268,8 @@ export class SessionManager extends EventEmitter {
         session.pendingPermission.res.writeHead(200, { "Content-Type": "application/json" });
         session.pendingPermission.res.end(JSON.stringify(body));
       }
-    } catch {
-      // Response already closed
+    } catch (err) {
+      streamDeck.logger.warn(`Failed to write deny response for session=${session.id}: ${err}`);
     }
     session.pendingPermission = null;
   }
