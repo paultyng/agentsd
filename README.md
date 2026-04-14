@@ -26,7 +26,7 @@ Permission request hooks hold the HTTP response open (up to 120s) so you can app
 ### Install
 
 ```sh
-git clone <repo-url> && cd agentsd
+git clone https://github.com/paultyng/agentsd.git && cd agentsd
 npm install
 npm run build
 npm run link          # register plugin with Stream Deck
@@ -61,9 +61,10 @@ npm run debug:hooks
 |--------|------|-------------|
 | **Session** | Button | Active session name, color-coded by state. Press to cycle sessions. Shows `(N/M)` counter. |
 | **Session Dial** | Encoder | Rotate to cycle sessions. Same info as Session button in dial feedback. |
-| **Status** | Button | Current state (`Working`, `Permission?`, `Question?`, `Idle`), tool name, subagent count. |
+| **Status** | Button | Current state (`Working`, `Permission?`, `Question?`, `Idle`, `Error`), tool name, active work count (subagents + tasks). |
 | **Mode** | Button | Permission mode (`Default`, `Plan`, `Auto`, etc.) and model name. |
 | **Approve** | Button | Approve pending permission. Green when active, gray otherwise. |
+| **Always Allow** | Button | Approve and add session-scoped allow rule for the tool. Gold when active, gray otherwise. |
 | **Deny** | Button | Deny pending permission. Red when active, gray otherwise. |
 | **Stop** | Button | Send Ctrl+C interrupt to frontmost Ghostty terminal. Red when a session is active. |
 | **Focus** | Button | Bring Ghostty (or Claude Desktop) to foreground. |
@@ -91,7 +92,7 @@ npm run debug:hooks
 
 The plugin registers hooks for all Claude Code lifecycle events:
 
-`SessionStart`, `SessionEnd`, `PreToolUse`, `PostToolUse`, `PostToolUseFailure`, `Stop`, `PermissionRequest`, `Notification`, `SubagentStart`, `SubagentStop`, `Elicitation`, `ElicitationResult`
+`SessionStart`, `SessionEnd`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `PostToolUseFailure`, `Stop`, `StopFailure`, `PermissionRequest`, `Notification`, `SubagentStart`, `SubagentStop`, `TaskCreated`, `TaskCompleted`, `Elicitation`, `ElicitationResult`
 
 Each event is posted to `http://localhost:9200/hooks/{EventName}`. The `hooks:install` script manages registration in `~/.claude/settings.json`.
 
