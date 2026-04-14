@@ -6,10 +6,10 @@ import type { SessionManager } from "./session-manager";
 import type { HookEventName, HookPayload } from "./types";
 
 const VALID_EVENTS = new Set<HookEventName>([
-  "SessionStart", "SessionEnd",
+  "SessionStart", "SessionEnd", "UserPromptSubmit",
   "PreToolUse", "PostToolUse", "PostToolUseFailure",
-  "Stop", "PermissionRequest", "Notification",
-  "SubagentStart", "SubagentStop",
+  "Stop", "StopFailure", "PermissionRequest", "Notification",
+  "SubagentStart", "SubagentStop", "TaskCreated", "TaskCompleted",
   "Elicitation", "ElicitationResult",
 ]);
 

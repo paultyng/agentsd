@@ -50,6 +50,14 @@
       "States": [{ "Image": "imgs/approve", "ShowTitle": true, "TitleAlignment": "bottom", "TitleColor": "#FFFFFF" }]
     },
     {
+      "UUID": "com.paultyng.agentsd.always-allow",
+      "Name": "Always Allow",
+      "Icon": "imgs/approve",
+      "Tooltip": "Approve and always allow this tool for the session.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "imgs/approve", "ShowTitle": true, "TitleAlignment": "bottom", "TitleColor": "#FFFFFF" }]
+    },
+    {
       "UUID": "com.paultyng.agentsd.deny",
       "Name": "Deny",
       "Icon": "imgs/deny",
@@ -74,6 +82,8 @@
     }
   ],
   "Author": "Paul Tyng",
+  "Category": "Claude Code",
+  "CategoryIcon": "imgs/plugin",
   "CodePath": "bin/plugin.js",
   "Description": "Stream Deck companion for Claude Code sessions. Shows session state, tools, and enables permission approval directly from hardware buttons.",
   "Icon": "imgs/plugin",

@@ -11,14 +11,18 @@ export enum State {
 export type HookEventName =
   | "SessionStart"
   | "SessionEnd"
+  | "UserPromptSubmit"
   | "PreToolUse"
   | "PostToolUse"
   | "PostToolUseFailure"
   | "Stop"
+  | "StopFailure"
   | "PermissionRequest"
   | "Notification"
   | "SubagentStart"
   | "SubagentStop"
+  | "TaskCreated"
+  | "TaskCompleted"
   | "Elicitation"
   | "ElicitationResult";
 
@@ -55,7 +59,7 @@ export interface SessionState {
   cwd: string;
   permissionMode: string;
   currentTool: string | null;
-  activeSubagents: number;
+  activeWork: number;
   lastError: string | null;
   model: string | null;
   pendingPermission: PendingPermission | null;

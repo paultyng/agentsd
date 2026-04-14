@@ -16,6 +16,7 @@ export function transition(current: State, event: HookEventName): State | null {
     case "SessionEnd":
       return State.DISCONNECTED;
 
+    case "UserPromptSubmit":
     case "PreToolUse":
       return current === State.DISCONNECTED ? null : State.PROCESSING;
 
@@ -39,10 +40,13 @@ export function transition(current: State, event: HookEventName): State | null {
       return current === State.AWAITING_ELICITATION ? State.IDLE : null;
 
     case "Stop":
+    case "StopFailure":
       return current === State.DISCONNECTED ? null : State.IDLE;
 
     case "SubagentStart":
     case "SubagentStop":
+    case "TaskCreated":
+    case "TaskCompleted":
     case "Notification":
       return null;
 

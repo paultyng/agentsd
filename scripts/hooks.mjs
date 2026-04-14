@@ -8,14 +8,18 @@ const BASE_URL = "http://localhost:9200/hooks";
 const HOOK_EVENTS = [
   { name: "SessionStart", timeout: 5 },
   { name: "SessionEnd", timeout: 5 },
+  { name: "UserPromptSubmit", timeout: 5 },
   { name: "PreToolUse", timeout: 5 },
   { name: "PostToolUse", timeout: 5 },
   { name: "PostToolUseFailure", timeout: 5 },
   { name: "Stop", timeout: 5 },
+  { name: "StopFailure", timeout: 5 },
   { name: "PermissionRequest", timeout: 120 },
   { name: "Notification", timeout: 5 },
   { name: "SubagentStart", timeout: 5 },
   { name: "SubagentStop", timeout: 5 },
+  { name: "TaskCreated", timeout: 5 },
+  { name: "TaskCompleted", timeout: 5 },
   { name: "Elicitation", timeout: 5 },
   { name: "ElicitationResult", timeout: 5 },
 ];

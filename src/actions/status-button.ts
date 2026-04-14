@@ -32,18 +32,23 @@ export class StatusButton extends ManagedAction {
         lines.push("Question?");
         break;
       case State.IDLE:
-        lines.push("Idle");
+        if (session.lastError) {
+          lines.push("Error");
+        } else {
+          lines.push("Idle");
+        }
         break;
       default:
         lines.push(session.state);
     }
 
-    if (session.activeSubagents > 0) {
-      lines.push("", `${session.activeSubagents} agent${session.activeSubagents > 1 ? "s" : ""}`);
+    if (session.activeWork > 0) {
+      lines.push("", `${session.activeWork} agent${session.activeWork > 1 ? "s" : ""}`);
     }
 
     const text = lines.join("\n");
-    const color = agentColor(session.activeSubagents);
+    const errorColor = session.state === State.IDLE && session.lastError ? "#da3633" : null;
+    const color = errorColor ?? agentColor(session.activeWork);
 
     for (const act of this.actions) {
       act.setTitle(text);

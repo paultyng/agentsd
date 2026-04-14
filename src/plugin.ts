@@ -4,6 +4,7 @@ import { HookServer } from "./hook-server";
 import { SessionManager } from "./session-manager";
 import { setManager } from "./actions/base";
 
+import { AlwaysAllowButton } from "./actions/always-allow-button";
 import { ApproveButton } from "./actions/approve-button";
 import { DenyButton } from "./actions/deny-button";
 import { FocusButton } from "./actions/focus-button";
@@ -33,6 +34,7 @@ streamDeck.actions.registerAction(new ModeButton());
 streamDeck.actions.registerAction(new StatusButton());
 streamDeck.actions.registerAction(new StopButton());
 streamDeck.actions.registerAction(new ApproveButton());
+streamDeck.actions.registerAction(new AlwaysAllowButton());
 streamDeck.actions.registerAction(new DenyButton());
 streamDeck.actions.registerAction(new FocusButton());
 streamDeck.actions.registerAction(new SessionDial());

@@ -77,7 +77,7 @@ export class SessionManager extends EventEmitter {
         cwd: payload.cwd ?? "unknown",
         permissionMode: payload.permission_mode ?? "default",
         currentTool: null,
-        activeSubagents: 0,
+        activeWork: 0,
         lastError: null,
         model: payload.model ?? null,
         pendingPermission: null,
@@ -121,6 +121,10 @@ export class SessionManager extends EventEmitter {
     }
 
     if (nextState !== null) {
+      // Clear error indicator when leaving IDLE
+      if (prevState === State.IDLE && nextState !== State.IDLE) {
+        session.lastError = null;
+      }
       session.state = nextState;
     }
 
@@ -151,13 +155,19 @@ export class SessionManager extends EventEmitter {
         session.lastError = payload.error ?? "Tool failed";
         break;
       case "SubagentStart":
-        session.activeSubagents++;
+      case "TaskCreated":
+        session.activeWork++;
         break;
       case "SubagentStop":
-        session.activeSubagents = Math.max(0, session.activeSubagents - 1);
+      case "TaskCompleted":
+        session.activeWork = Math.max(0, session.activeWork - 1);
         break;
       case "Stop":
         session.currentTool = null;
+        break;
+      case "StopFailure":
+        session.currentTool = null;
+        session.lastError = payload.error ?? "Agent stopped due to error";
         break;
       case "SessionEnd":
         this.clearPendingPermission(session);
@@ -231,6 +241,40 @@ export class SessionManager extends EventEmitter {
     this.removeFromPermissionQueue(sessionId);
     this.emit("sessionUpdated", session, "PermissionRequest");
     this.advancePermissionQueue();
+  }
+
+  resolvePermissionAlwaysAllow(sessionId: string): boolean {
+    const session = this.sessions.get(sessionId);
+    if (!session?.pendingPermission) return false;
+
+    const { res, timer, toolName } = session.pendingPermission;
+    clearTimeout(timer);
+
+    if (!res.writableEnded) {
+      const body = {
+        hookSpecificOutput: {
+          hookEventName: "PermissionRequest",
+          decision: {
+            behavior: "allow",
+            updatedPermissions: [{
+              type: "addRules",
+              rules: [{ toolName: toolName ?? "*", ruleContent: "*" }],
+              behavior: "allow",
+              destination: "session",
+            }],
+          },
+        },
+      };
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(body));
+    }
+
+    session.pendingPermission = null;
+    session.state = State.PROCESSING;
+    this.removeFromPermissionQueue(sessionId);
+    this.emit("sessionUpdated", session, "PermissionRequest");
+    this.advancePermissionQueue();
+    return true;
   }
 
   resolvePermission(sessionId: string, allow: boolean, reason?: string): boolean {
