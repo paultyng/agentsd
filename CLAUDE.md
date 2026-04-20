@@ -8,6 +8,8 @@ agentsd — a Stream Deck plugin for orchestrating local AI agent usage. Early s
 
 ## Build & Test
 
+Use npm scripts only — no Taskfile or Makefile.
+
 - `npm run build` — rollup build → `com.paultyng.agentsd.sdPlugin/bin/plugin.js`
 - `npm run watch` — rollup watch mode
 - `npm run dev` — Stream Deck dev mode
