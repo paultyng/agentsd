@@ -3,7 +3,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 
 const SETTINGS_PATH = join(homedir(), ".claude", "settings.json");
-const BASE_URL = "http://localhost:9200/hooks";
+const BASE_URL = "http://127.0.0.1:9200/hooks";
 
 const HOOK_EVENTS = [
   { name: "SessionStart", timeout: 5 },
