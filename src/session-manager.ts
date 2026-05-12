@@ -1,7 +1,7 @@
 import { EventEmitter } from "node:events";
 import streamDeck from "@elgato/streamdeck";
 import { transition } from "./state-machine";
-import type { HookEventName, HookPayload, PendingPermission, SessionState } from "./types";
+import type { HookEventName, HookPayload, PendingPermission, SessionSnapshot, SessionState } from "./types";
 import { State } from "./types";
 import { extractModel } from "./util/transcript";
 
@@ -51,6 +51,27 @@ export class SessionManager extends EventEmitter {
 
   get sessionCount(): number {
     return this.sessions.size;
+  }
+
+  /**
+   * Serializable per-session view for the /debug/sessions endpoint and tests.
+   * Drops PendingPermission's req/res/timer, which are not JSON-safe.
+   */
+  getSnapshot(): SessionSnapshot[] {
+    return [...this.sessions.values()].map((s) => ({
+      id: s.id,
+      state: s.state,
+      cwd: s.cwd,
+      permissionMode: s.permissionMode,
+      currentTool: s.currentTool,
+      activeWork: s.activeWork,
+      lastError: s.lastError,
+      model: s.model,
+      pid: s.pid,
+      lastActivity: s.lastActivity,
+      hasPendingPermission: !!s.pendingPermission,
+      pendingPermissionToolName: s.pendingPermission?.toolName ?? null,
+    }));
   }
 
   cycleSession(direction: number): SessionState | undefined {

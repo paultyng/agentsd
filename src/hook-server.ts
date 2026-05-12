@@ -13,19 +13,38 @@ const VALID_EVENTS = new Set<HookEventName>([
   "Elicitation", "ElicitationResult",
 ]);
 
-/** How long to hold a PermissionRequest response open before auto-denying. */
+/** Default time to hold a PermissionRequest response open before auto-denying. */
 const PERMISSION_TIMEOUT_MS = 120_000;
 /** Maximum request body size (1 MB). */
 const MAX_BODY_BYTES = 1_024 * 1_024;
 
+export interface HookServerOptions {
+  /** Expose GET /debug/sessions returning serialized session state. Defaults to env AGENTSD_DEBUG="1". */
+  debugEnabled?: boolean;
+  /** PermissionRequest hold-open timeout in ms. Defaults to 120s. */
+  permissionTimeoutMs?: number;
+}
+
 export class HookServer {
   private server: Server | null = null;
   private readonly connections = new Set<Socket>();
+  private readonly debugEnabled: boolean;
+  private readonly permissionTimeoutMs: number;
 
   constructor(
     private readonly sessionManager: SessionManager,
     private readonly port: number = 9200,
-  ) {}
+    options: HookServerOptions = {},
+  ) {
+    this.debugEnabled = options.debugEnabled ?? process.env.AGENTSD_DEBUG === "1";
+    this.permissionTimeoutMs = options.permissionTimeoutMs ?? PERMISSION_TIMEOUT_MS;
+  }
+
+  /** Resolved port after start() (useful when constructed with port=0). */
+  get listeningPort(): number | null {
+    const addr = this.server?.address();
+    return addr && typeof addr === "object" ? addr.port : null;
+  }
 
   start(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -70,14 +89,22 @@ export class HookServer {
   }
 
   private async handleRequest(req: IncomingMessage, res: ServerResponse): Promise<void> {
+    // Parse URL once for both debug and hook paths.
+    const url = new URL(req.url ?? "", "http://localhost");
+
+    // Debug endpoint (gated). GET only; serves a snapshot of current sessions.
+    if (this.debugEnabled && req.method === "GET" && url.pathname === "/debug/sessions") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(this.sessionManager.getSnapshot()));
+      return;
+    }
+
     if (req.method !== "POST") {
       res.writeHead(405);
       res.end();
       return;
     }
 
-    // Parse URL robustly (handles query strings and extra path segments)
-    const url = new URL(req.url ?? "", "http://localhost");
     const segments = url.pathname.split("/");
     const eventName = segments[2];
 
@@ -115,7 +142,7 @@ export class HookServer {
         }
         // Clear pending state without trying to write the response again
         this.sessionManager.clearPendingPermissionById(payload.session_id);
-      }, PERMISSION_TIMEOUT_MS);
+      }, this.permissionTimeoutMs);
 
       this.sessionManager.setPendingPermission(payload.session_id, {
         req,

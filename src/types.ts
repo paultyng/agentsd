@@ -68,3 +68,22 @@ export interface SessionState {
   /** Epoch ms of last hook event, used for stale-session pruning. */
   lastActivity: number;
 }
+
+/**
+ * Serializable view of a session for the /debug/sessions endpoint.
+ * Strips the PendingPermission's live req/res/timer references.
+ */
+export interface SessionSnapshot {
+  id: string;
+  state: State;
+  cwd: string;
+  permissionMode: string;
+  currentTool: string | null;
+  activeWork: number;
+  lastError: string | null;
+  model: string | null;
+  pid: number | null;
+  lastActivity: number;
+  hasPendingPermission: boolean;
+  pendingPermissionToolName: string | null;
+}
