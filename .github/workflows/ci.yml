@@ -29,7 +29,11 @@ jobs:
           node-version: '22'
           cache: npm
 
-      - run: npm ci
+      # npm install (not ci): some transitive deps from rollup's native
+      # bindings ship only the host platform's optional entries in the lock,
+      # so `npm ci` rejects cross-OS runs. `npm install` still respects the
+      # lock for resolved versions but won't fail on platform-only adds.
+      - run: npm install --no-fund --no-audit
 
       - name: Typecheck
         run: npm run typecheck
