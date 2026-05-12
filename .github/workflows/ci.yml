@@ -76,5 +76,26 @@ jobs:
       - name: Verify testagent
         run: testagent --help
 
+      - name: Test (with coverage on Linux)
+        if: runner.os == 'Linux'
+        run: npm run test:coverage
+
       - name: Test
+        if: runner.os != 'Linux'
         run: npm test
+
+      - name: Coverage summary
+        if: runner.os == 'Linux' && always() && hashFiles('coverage/coverage-summary.json') != ''
+        run: |
+          {
+            echo "## Coverage"
+            echo
+            echo "| File | Lines | Statements | Functions | Branches |"
+            echo "|---|---|---|---|---|"
+            jq -r '
+              to_entries
+              | sort_by(if .key == "total" then 0 else 1 end, .key)
+              | .[]
+              | "| \(if .key == "total" then "**Total**" else "`" + (.key | sub(".*/src/"; "src/")) + "`" end) | \(.value.lines.pct)% | \(.value.statements.pct)% | \(.value.functions.pct)% | \(.value.branches.pct)% |"
+            ' coverage/coverage-summary.json
+          } >> "$GITHUB_STEP_SUMMARY"
