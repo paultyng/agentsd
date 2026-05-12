@@ -5,5 +5,8 @@ export default defineConfig({
     environment: "node",
     include: ["tests/**/*.test.ts"],
     setupFiles: ["./tests/setup.ts"],
+    // E2E tests spawn testagent subprocesses; running test files serially
+    // avoids subprocess/transcript contention and keeps polling deterministic.
+    fileParallelism: false,
   },
 });
