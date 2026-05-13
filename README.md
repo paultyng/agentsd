@@ -55,6 +55,29 @@ Debug the hook event flow interactively:
 npm run debug:hooks
 ```
 
+## Testing
+
+Three layers:
+
+- **Unit tests** for `SessionManager` and helpers: mock `@elgato/streamdeck`, drive state transitions directly.
+- **Integration tests** for the HTTP hook server: `fetch` POSTs hook payloads at an OS-assigned port; verify routing, permission hold-open, and the `AGENTSD_DEBUG=1` `/debug/sessions` endpoint.
+- **End-to-end tests** that spawn [testagent](https://github.com/paultyng/testagent), a deterministic fake of the Claude Code CLI that fires real-shaped hook payloads. The E2E suite exercises the full wire-up (testagent → HTTP → SessionManager) without needing a model or API key.
+
+```sh
+npm test                # all layers
+npm run test:watch      # vitest watch mode
+npm run test:coverage   # generates coverage/ with HTML and JSON reports
+```
+
+E2E tests skip automatically when `testagent` isn't on PATH. To install locally:
+
+```sh
+go install github.com/paultyng/testagent/cmd/testagent@latest
+# or grab a binary release: https://github.com/paultyng/testagent/releases
+```
+
+CI runs every layer on Linux, macOS, and Windows for each PR. The coverage summary appears in the GitHub Actions job UI on the Linux run.
+
 ## Actions
 
 | Action | Type | Description |
