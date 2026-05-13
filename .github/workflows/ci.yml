@@ -16,7 +16,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        # Stream Deck app only runs on macOS and Windows; Linux is irrelevant
+        # for an end-user-installable Stream Deck plugin. Drop ubuntu so we
+        # don't pay for a runner that won't catch real user issues.
+        os: [macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     env:
       TESTAGENT_VERSION: v0.2.1
@@ -80,16 +83,16 @@ jobs:
       - name: Verify testagent
         run: testagent --help
 
-      - name: Test (with coverage on Linux)
-        if: runner.os == 'Linux'
+      - name: Test (with coverage on macOS)
+        if: runner.os == 'macOS'
         run: npm run test:coverage
 
       - name: Test
-        if: runner.os != 'Linux'
+        if: runner.os != 'macOS'
         run: npm test
 
       - name: Coverage summary
-        if: runner.os == 'Linux' && always() && hashFiles('coverage/coverage-summary.json') != ''
+        if: runner.os == 'macOS' && always() && hashFiles('coverage/coverage-summary.json') != ''
         run: |
           {
             echo "## Coverage"
