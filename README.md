@@ -1,58 +1,58 @@
 # agentsd
 
-Stream Deck plugin for managing [Claude Code](https://claude.ai/code) sessions. Monitor session state, approve or deny permission requests, and control agents — all from hardware buttons.
+Stream Deck plugin for managing [Claude Code](https://claude.ai/code) sessions. Monitor session state, approve or deny permission requests, and control agents from hardware buttons.
 
-macOS only. Requires [Stream Deck](https://www.elgato.com/stream-deck) and the [Elgato Stream Deck app](https://www.elgato.com/downloads) (6.6+).
+<p align="center"><img src="docs/preview.png" alt="agentsd buttons on a Stream Deck" width="320"></p>
+
+## Requirements
+
+- **macOS 13+** (Windows support tracked separately; see issue for details)
+- **Stream Deck app 6.6+** plus a [Stream Deck](https://www.elgato.com/stream-deck) device
+- **Node.js 20+**
+- **Claude Code** with [HTTP hooks](https://code.claude.com/docs/en/hooks-guide) support
 
 ## How it works
 
-Claude Code [HTTP hooks](https://code.claude.com/docs/en/hooks-guide) post events to a local server (`127.0.0.1:9200`). The plugin translates those events into session state displayed on Stream Deck buttons and dials.
+Claude Code HTTP hooks post events to a local server (`127.0.0.1:9200`). The plugin translates those events into session state on Stream Deck buttons and dials.
 
 ```
 Claude Code hooks → HTTP server (:9200) → SessionManager → Stream Deck UI
 ```
 
-Permission request hooks hold the HTTP response open (up to 120s) so you can approve or deny directly from a button press.
+`PermissionRequest` hooks hold the HTTP response open (up to 120 s) so you can approve or deny directly from a button press.
 
-## Setup
-
-### Prerequisites
-
-- macOS 13+
-- Node.js 20+
-- Stream Deck app 6.6+
-- [Elgato CLI](https://docs.elgato.com/streamdeck/sdk/getting-started) (`npm install -g @elgato/cli`)
-
-### Install
+## Install
 
 ```sh
 git clone https://github.com/paultyng/agentsd.git && cd agentsd
 npm install
+npm install -g @elgato/cli   # one-time global; provides the `streamdeck` CLI used by `npm run link`/`dev`
 npm run build
-npm run link          # register plugin with Stream Deck
-npm run hooks:install # add Claude Code HTTP hooks to ~/.claude/settings.json
+npm run link                 # register plugin with Stream Deck
+npm run hooks:install        # add Claude Code HTTP hooks to ~/.claude/settings.json
 ```
 
-After linking, restart the Stream Deck app. The actions will appear under "Claude Code" in the action list.
+After linking, restart the Stream Deck app. The actions appear under "Claude Code" in the action list.
 
 ### Uninstall
 
 ```sh
-npm run hooks:uninstall  # remove hooks from ~/.claude/settings.json
-npm run unlink           # unregister plugin
+npm run hooks:uninstall      # remove hooks from ~/.claude/settings.json
+npm run unlink               # unregister plugin
 ```
+
+## Configuration
+
+| Env var | Default | Effect |
+|---|---|---|
+| `AGENTSD_DEBUG` | unset | When `1`, the hook server exposes `GET /debug/sessions` returning a JSON snapshot of every tracked session. Used by the test suite; safe to enable locally for diagnostics. |
 
 ## Development
 
 ```sh
-npm run watch  # rebuild on file changes
-npm run dev    # Stream Deck dev mode (hot reload)
-```
-
-Debug the hook event flow interactively:
-
-```sh
-npm run debug:hooks
+npm run watch        # rebuild on file changes
+npm run dev          # Stream Deck dev mode (hot reload)
+npm run debug:hooks  # interactive hook event probe
 ```
 
 ## Testing
